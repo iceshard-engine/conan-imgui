@@ -61,7 +61,7 @@ class ImGuiConan(ConanFile):
         # Copy the license file
         self.copy("LICENSE.txt", src=self.IMGUI_FOLDER_NAME, dst="LICENSE")
 
-        self.copy("*.h", "include", "{}/include".format(self.IMGUI_FOLDER_NAME), keep_path=True)
+        self.copy("*.h", "include/imgui", self.IMGUI_FOLDER_NAME, keep_path=True, excludes=("examples/*", "misc/*"))
 
         build_dir = os.path.join(self.IMGUI_FOLDER_NAME, "bin")
 
