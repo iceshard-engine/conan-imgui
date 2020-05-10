@@ -4,70 +4,58 @@ import os
 
 class ImGuiConan(ConanFile):
     name = "imgui"
-    version = "1.74"
     license = "https://github.com/ocornut/imgui/blob/master/LICENSE.txt"
     description = "Dear ImGui: Bloat-free Immediate Mode Graphical User interface for C++ with minimal dependencies"
     url = "https://github.com/ocornut/imgui"
 
+    # Setting and options
     settings = "os", "compiler", "arch"
+
+    options = {
+        "docking_branch": [True, False]
+    }
+    default_options = {
+        "docking_branch": False
+    }
+
+    # Additional files to export
     exports_sources = ["premake5.lua"]
 
-    build_requires = "premake_installer/5.0.0-alpha14@bincrafters/stable"
+    # Iceshard conan tools
+    python_requires = "conan-iceshard-tools/0.4@iceshard/stable"
+    python_requires_extend = "conan-iceshard-tools.IceTools"
 
-    IMGUI_FOLDER_NAME = "imgui-{}".format(version)
+    def init(self):
+        self.ice_init("premake5")
+        self.build_requires = self._ice.build_requires
 
-
-    def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            del self.settings.compiler.runtime
-
-    # The the source from github
-    def source(self):
-        zip_name = "imgui-{}.zip".format(self.version)
-        tools.download("https://github.com/ocornut/imgui/archive/v{}.zip".format(self.version), zip_name)
-        tools.unzip(zip_name)
-        os.unlink(zip_name)
+    # Override the source entry method
+    def ice_source_entry(self, version):
+        # We are appending '-docking' string so the right entry from 'conandata.yml' file is picked.
+        if self.options.docking_branch == True:
+            return "{}-docking".format(version)
+        else:
+            return version
 
     # Build both the debug and release builds
-    def build(self):
-        _premake_action = "gmake"
+    def ice_build(self):
+        copyfile("../premake5.lua", "premake5.lua")
+        self.ice_generate()
 
         if self.settings.compiler == "Visual Studio":
-            _visuals = {
-                "11": "vs2012",
-                "12": "vs2013",
-                "14": "vs2015",
-                "15": "vs2017",
-                "16": "vs2019",
-            }
-            _premake_action = "{}".format(_visuals.get(str(self.settings.compiler.version), "vs2019"))
+            self.ice_build_msbuild("imgui.sln", ["Debug", "Release"])
 
-        with tools.chdir(os.path.join(self.source_folder, self.IMGUI_FOLDER_NAME)):
-
-            copyfile("../premake5.lua", "premake5.lua")
-
-            self.run("premake5 {} --arch={}".format(_premake_action, self.settings.arch))
-
-            if self.settings.compiler == "Visual Studio":
-                msbuild = MSBuild(self)
-                msbuild.build("imgui.sln", build_type="Debug")
-                msbuild.build("imgui.sln", build_type="Release")
-
-            if self.settings.compiler == "clang":
-                self.run("make config=debug")
-                self.run("make config=release")
+        else:
+            self.ice_build_make(["Debug", "Release"])
 
     def package(self):
-        # Copy the license file
-        self.copy("LICENSE.txt", src=self.IMGUI_FOLDER_NAME, dst="LICENSE")
+        self.copy("LICENSE.txt", src=self._ice.out_dir, dst="LICENSE")
 
-        self.copy("*.h", "include/imgui", self.IMGUI_FOLDER_NAME, keep_path=True, excludes=("examples/*", "misc/*"))
+        self.copy("*.h", "include/imgui", src=self._ice.out_dir, keep_path=True, excludes=("examples/*", "misc/*"))
 
-        build_dir = os.path.join(self.IMGUI_FOLDER_NAME, "bin")
-
+        build_dir = os.path.join(self._ice.out_dir, "bin")
         if self.settings.os == "Windows":
             self.copy("*.lib", "lib", build_dir, keep_path=True)
-
         if self.settings.os == "Linux":
             self.copy("*.a", "lib", build_dir, keep_path=True)
 

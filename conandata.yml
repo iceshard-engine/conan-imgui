@@ -1,0 +1,7 @@
+sources:
+  "1.74":
+    url: "https://github.com/ocornut/imgui.git"
+    branch: master
+  "1.74-docking":
+    url: "https://github.com/ocornut/imgui.git"
+    branch: docking
