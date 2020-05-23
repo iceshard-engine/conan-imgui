@@ -11,18 +11,11 @@ class ImGuiConan(ConanFile):
     # Setting and options
     settings = "os", "compiler", "arch"
 
-    options = {
-        "docking_branch": [True, False]
-    }
-    default_options = {
-        "docking_branch": False
-    }
-
     # Additional files to export
     exports_sources = ["premake5.lua"]
 
     # Iceshard conan tools
-    python_requires = "conan-iceshard-tools/0.4@iceshard/stable"
+    python_requires = "conan-iceshard-tools/0.5.2@iceshard/stable"
     python_requires_extend = "conan-iceshard-tools.IceTools"
 
     def init(self):
@@ -32,7 +25,7 @@ class ImGuiConan(ConanFile):
     # Override the source entry method
     def ice_source_entry(self, version):
         # We are appending '-docking' string so the right entry from 'conandata.yml' file is picked.
-        if self.options.docking_branch == True:
+        if self.channel == "docking":
             return "{}-docking".format(version)
         else:
             return version
