@@ -9,8 +9,11 @@ jobs:
   deploy-build-windows:
     name: Deploy (Windows)
     runs-on: windows-latest
+    strategy:
+      matrix:
+        channel: [stable, docking]
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Setup repository
       run: |
         pip install conan
@@ -18,8 +21,8 @@ jobs:
         conan remote add conan-bincrafters https://api.bintray.com/conan/bincrafters/public-conan
     - name: Build
       run: |
-        conan create . imgui/1.74@iceshard/stable
+        conan create . imgui/1.77@iceshard/${{ matrix.channel }}
     - name: Deploy
       run: |
         conan user iceshard -r conan-iceshard -p ${{ secrets.CONAN_PASSWORD }}
-        conan upload -r conan-iceshard imgui/1.74@iceshard/stable --all
+        conan upload -r conan-iceshard imgui/1.77@iceshard/${{ matrix.channel }} --all
