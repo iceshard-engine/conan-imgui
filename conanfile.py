@@ -15,7 +15,7 @@ class ImGuiConan(ConanFile):
     exports_sources = ["premake5.lua"]
 
     # Iceshard conan tools
-    python_requires = "conan-iceshard-tools/0.5.2@iceshard/stable"
+    python_requires = "conan-iceshard-tools/0.5.3@iceshard/stable"
     python_requires_extend = "conan-iceshard-tools.IceTools"
 
     def init(self):
@@ -53,7 +53,7 @@ class ImGuiConan(ConanFile):
             self.copy("*.a", "lib", build_dir, keep_path=True)
 
     def package_info(self):
+        self.cpp_info.libdirs = []
         self.cpp_info.debug.libdirs = [ "lib/Debug" ]
         self.cpp_info.release.libdirs = [ "lib/Release" ]
-        self.cpp_info.libdirs = []
         self.cpp_info.libs = ["imgui"]

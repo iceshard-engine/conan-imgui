@@ -1,7 +1,11 @@
 sources:
   "1.74":
     url: "https://github.com/ocornut/imgui.git"
-    branch: master
-  "1.74-docking":
+    tag: "v1.74"
+  "1.77":
     url: "https://github.com/ocornut/imgui.git"
-    branch: docking
+    tag: "v1.77"
+  "1.77-docking":
+    url: "https://github.com/ocornut/imgui.git"
+    branch: "docking"
+    commit: "a9626e1162c3742307553108aff8a443c20bb73c"
